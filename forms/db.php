@@ -9,7 +9,7 @@
 const DB_HOST = '127.0.0.1';
 const DB_NAME = 'atessa_security';
 const DB_USER = 'root';
-const DB_PASS = '';
+const DB_PASS = 'Contraseña_Super_Segura_123';
 const DB_CHARSET = 'utf8mb4';
 
 /**
