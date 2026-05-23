@@ -48,13 +48,7 @@
           displayError(thisForm, 'Error: reCAPTCHA no está disponible.');
         }
       } else {
-        // Verificar si estamos en entorno local (para demos)
-        if (isLocalEnvironment()) {
-          console.log('Modo demo local detectado');
-          handleLocalDemo(thisForm);
-        } else {
-          submitForm(thisForm, action, formData);
-        }
+        submitForm(thisForm, action, formData);
       }
     });
   });
@@ -97,33 +91,6 @@
     return isValid;
   }
 
-  // Función de respaldo para demostraciones locales
-  function handleLocalDemo(thisForm) {
-    showLoading(thisForm);
-    
-    // Simular procesamiento
-    setTimeout(() => {
-      hideLoading(thisForm);
-      
-      // Simular éxito después de 2 segundos
-      displaySuccess(thisForm, 'MODO DEMO: Su solicitud ha sido simulada exitosamente. En el servidor real, esto enviaría un email a info@atessatechnologies.com');
-      thisForm.reset();
-      
-      // Limpiar validaciones
-      let inputs = thisForm.querySelectorAll('.is-invalid');
-      inputs.forEach(input => input.classList.remove('is-invalid'));
-      
-    }, 2000);
-  }
-
-  // Detectar si estamos en localhost/file://
-  function isLocalEnvironment() {
-    return window.location.protocol === 'file:' || 
-           window.location.hostname === 'localhost' || 
-           window.location.hostname === '127.0.0.1' ||
-           window.location.hostname === '';
-  }
-
   function submitForm(thisForm, action, formData) {
     // Crear timeout para evitar que se quede colgado
     const timeoutPromise = new Promise((_, reject) => {
@@ -138,8 +105,7 @@
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Accept': 'application/json, text/plain, */*'
-      },
-      timeout: 10000 // 10 segundos timeout adicional
+      }
     })
     .then(response => {
       if (response.ok) {
@@ -266,6 +232,7 @@
   }
 
   function displaySuccess(form, message) {
+    hideLoading(form);
     let successMsg = form.querySelector('.sent-message');
     if (successMsg) {
       successMsg.innerHTML = message;
