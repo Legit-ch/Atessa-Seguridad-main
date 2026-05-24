@@ -6,14 +6,19 @@
 
 require_once __DIR__ . '/forms/db.php';
 
-// Cambie el nombre de usuario y la contraseña por valores seguros.
-$adminUsers = [
-    'admin' => 'Atessa123!'
-];
+// Las credenciales de administrador deben almacenarse fuera del código fuente.
+$adminUser = getEnvValue('ADMIN_USER');
+$adminPass = getEnvValue('ADMIN_PASS');
+
+if ($adminUser === '' || $adminPass === '') {
+    http_response_code(500);
+    echo 'Error de configuración: faltan credenciales de administrador.';
+    exit;
+}
 
 if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) ||
-    !array_key_exists($_SERVER['PHP_AUTH_USER'], $adminUsers) ||
-    $adminUsers[$_SERVER['PHP_AUTH_USER']] !== $_SERVER['PHP_AUTH_PW']) {
+    $_SERVER['PHP_AUTH_USER'] !== $adminUser ||
+    $_SERVER['PHP_AUTH_PW'] !== $adminPass) {
     header('WWW-Authenticate: Basic realm="Atessa Admin"');
     header('HTTP/1.0 401 Unauthorized');
     echo 'Autenticación requerida.';

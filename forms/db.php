@@ -5,12 +5,74 @@
  * Modifique las constantes de conexión si su servidor MySQL usa otras credenciales.
  */
 
-// Configuración de base de datos
+// Configuración de base de datos por defecto.
+// En producción debe configurar estas variables mediante el servidor o un archivo .env fuera del control de versiones.
 const DB_HOST = '127.0.0.1';
 const DB_NAME = 'atessa_security';
 const DB_USER = 'root';
-const DB_PASS = 'Contraseña_Super_Segura_123';
+const DB_PASS = '';
 const DB_CHARSET = 'utf8mb4';
+
+loadEnvFile(__DIR__ . '/../.env');
+
+/**
+ * Devuelve una variable de entorno con fallback.
+ *
+ * @param string $name
+ * @param string $default
+ * @return string
+ */
+function getEnvValue(string $name, string $default = ''): string
+{
+    $value = getenv($name);
+
+    if ($value !== false) {
+        return $value;
+    }
+
+    if (array_key_exists($name, $_ENV) && $_ENV[$name] !== '') {
+        return $_ENV[$name];
+    }
+
+    return $default;
+}
+
+/**
+ * Carga un archivo .env simple si existe.
+ *
+ * @param string $filePath
+ * @return void
+ */
+function loadEnvFile(string $filePath): void
+{
+    if (!is_readable($filePath)) {
+        return;
+    }
+
+    foreach (file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = trim($line);
+
+        if ($line === '' || $line[0] === '#') {
+            continue;
+        }
+
+        if (strpos($line, '=') === false) {
+            continue;
+        }
+
+        [$name, $value] = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+
+        if ($name === '' || getenv($name) !== false) {
+            continue;
+        }
+
+        putenv("$name=$value");
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
+    }
+}
 
 /**
  * Devuelve una conexión PDO reutilizable.
@@ -26,10 +88,16 @@ function getDbConnection(): PDO
         return $pdo;
     }
 
-    $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', DB_HOST, DB_NAME, DB_CHARSET);
+    $dbHost = getEnvValue('DB_HOST', DB_HOST);
+    $dbName = getEnvValue('DB_NAME', DB_NAME);
+    $dbUser = getEnvValue('DB_USER', DB_USER);
+    $dbPass = getEnvValue('DB_PASS', DB_PASS);
+    $dbCharset = getEnvValue('DB_CHARSET', DB_CHARSET);
+
+    $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', $dbHost, $dbName, $dbCharset);
 
     try {
-        $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+        $pdo = new PDO($dsn, $dbUser, $dbPass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
