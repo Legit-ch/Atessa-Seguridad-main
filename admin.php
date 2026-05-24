@@ -6,23 +6,38 @@
 
 require_once __DIR__ . '/forms/db.php';
 
-// Las credenciales de administrador deben almacenarse fuera del código fuente.
-$adminUser = getEnvValue('ADMIN_USER');
-$adminPass = getEnvValue('ADMIN_PASS');
+// Sesión segura para la administración
+session_set_cookie_params([
+  'lifetime' => 0,
+  'path' => '/',
+  'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+  'httponly' => true,
+  'samesite' => 'Lax'
+]);
+session_start();
 
-if ($adminUser === '' || $adminPass === '') {
-    http_response_code(500);
-    echo 'Error de configuración: faltan credenciales de administrador.';
-    exit;
+// Requiere que el administrador y el hash estén configurados en el entorno
+$adminUser = getEnvValue('ADMIN_USER');
+$adminPassHash = getEnvValue('ADMIN_PASS_HASH');
+if ($adminUser === '' || $adminPassHash === '') {
+  http_response_code(500);
+  echo 'Error de configuración: faltan credenciales de administrador.';
+  exit;
 }
 
-if (!isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) ||
-    $_SERVER['PHP_AUTH_USER'] !== $adminUser ||
-    $_SERVER['PHP_AUTH_PW'] !== $adminPass) {
-    header('WWW-Authenticate: Basic realm="Atessa Admin"');
-    header('HTTP/1.0 401 Unauthorized');
-    echo 'Autenticación requerida.';
-    exit;
+// En producción, forzar HTTPS (o comprobar X-Forwarded-Proto detrás de proxy)
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+  (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+if (!$isHttps) {
+  http_response_code(403);
+  echo 'HTTPS requerido.';
+  exit;
+}
+
+// Verificar sesión administrativa
+if (empty($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
+  header('Location: admin_login.php');
+  exit;
 }
 
 try {
@@ -54,6 +69,7 @@ try {
     <div class="admin-header text-center">
       <h1>Panel de Administración</h1>
       <p class="text-muted">Solicitudes de cotización y mensajes de contacto registrados en la base de datos.</p>
+      <div class="mt-2"><a href="admin_logout.php" class="btn btn-sm btn-outline-secondary">Cerrar sesión</a></div>
     </div>
 
     <div class="table-responsive">
