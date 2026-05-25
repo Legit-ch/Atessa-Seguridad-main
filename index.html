@@ -219,6 +219,9 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+
+  <!-- CSRF Token para protección de formularios -->
+  <meta name="csrf-token" content="">
 </head>
 
 <body class="index-page">
@@ -896,7 +899,6 @@
                 </div>
 
                 <div class="col-md-12 text-center">
-                  <div class="loading">Enviando mensaje...</div>
                   <div class="error-message alert alert-danger" style="display: none;"></div>
                   <div class="sent-message alert alert-success" style="display: none;">
                     <i class="fas fa-envelope-check"></i> Su mensaje ha sido enviado exitosamente. 
@@ -1129,6 +1131,9 @@
       });
     });
   </script>
+
+  <!-- Cliente API REST para consumir backend -->
+  <script src="frontend/js/api.js"></script>
 
 </body>
 

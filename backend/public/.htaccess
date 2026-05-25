@@ -1,0 +1,11 @@
+# Configuración de Apache para la API REST
+# Coloca este archivo en: backend/public/.htaccess
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirigir todas las peticiones a index.php excepto archivos/carpetas que existan
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
