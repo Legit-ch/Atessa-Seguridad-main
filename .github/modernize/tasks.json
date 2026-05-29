@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "id": "task-1",
+      "name": "Review project structure",
+      "description": "Inspect the existing folder structure, frontend, backend, and setup files. Identify where the app can be organized better."
+    },
+    {
+      "id": "task-2",
+      "name": "Document architecture",
+      "description": "Summarize the app architecture, routes, and data flow in a simple way. Add notes about the PHP backend and frontend integration."
+    },
+    {
+      "id": "task-3",
+      "name": "Find security issues",
+      "description": "Look for common PHP and form security problems. Suggest fixes for input validation, sanitization, and authentication."
+    }
+  ]
+}
